@@ -1,7 +1,6 @@
-#include <stdio.h>
-struct file_info_st{
-    char filepath_in[256],filepath_out[256],password[128];
-};
+#define CHUNK_SIZE 8
+#include <string.h>
+#include"fileio.h"
 struct file_info_st get_file_info();
-void encrypt();
-void decrypt();
+void encrypt(struct file_info_st file_info);
+void decrypt(struct file_info_st file_info);

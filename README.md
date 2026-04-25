@@ -93,7 +93,7 @@ D. File Handling Module
 - Reads data block-by-block
 - Writes processed output
 
-E. XTEA Cipher Module
+E. XTEA Cipher Module 
 ---------------------
 Performs:
 - Encryption
@@ -111,6 +111,7 @@ Creates:
 - Restored decrypted file
 
 
+
 ============================================================
 4. FOLDER STRUCTURE
 ============================================================
@@ -124,6 +125,8 @@ XTEA_File_Encryptor/
 ├── fileio.h
 ├── keygen.c
 ├── keygen.h
+├── processor.c
+├── processor.h
 ├── sample.txt
 ├── encrypted.enc
 ├── decrypted.txt
@@ -140,6 +143,13 @@ main.c
 Program entry point.
 Contains menu and function calls.
 
+processor.c
+-----------
+Contains complete workflow exposed to main.c as functions
+
+processor.h
+-----------
+Header file for processor.c
 xtea.c
 ------
 Contains XTEA encryption/decryption logic.
