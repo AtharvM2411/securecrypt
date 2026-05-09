@@ -1,6 +1,8 @@
 #include "processor.h"
 #include "fileio.h"
 #include "xtea.h"
+#include "cbc.h"
+#include "config.h"
 struct file_info_st get_file_info(){
     struct file_info_st file_info;
 
@@ -22,17 +24,30 @@ struct file_info_st get_file_info(){
 void encrypt(struct file_info_st file_info){
     //packing-unpacking variables
     size_t bytes_per_word = (WORD_SIZE)/(BITS_PER_BYTE); 
-    uint32_t file_word[(CHUNK_SIZE)/(bytes_per_word)];
+    size_t words_per_chunk =(CHUNK_SIZE)/(bytes_per_word);
+    uint32_t file_word[words_per_chunk];
+    uint8_t last_block_flag=0;//padding variable
+    //packing-unpacking variables
+
+    //cbc variables
+    uint32_t prev_block[words_per_chunk];//=IV;
+    //cbc variables
+
+    //temp_key
+    uint32_t key[KEY_SIZE/WORD_SIZE];//call keygen here 
     //
+
+    //fileio vars
     uint8_t file_chunk[CHUNK_SIZE];
+
     size_t bytes_read,bytes_written;
-    int last_block_flag=0;
 
     FILE * fpr = file_open_read(file_info.filepath_in);
     if(fpr==NULL){printf("Error finding \"%s\".\n",file_info.filepath_in);return;}
 
     FILE * fpw = file_open_write(file_info.filepath_out);
     if(fpw==NULL){printf("Error finding \"%s\".\n",file_info.filepath_out);fclose(fpr);return;}
+    //fileio vars
 
     printf("\nBoth locations found.\n");
 
@@ -53,13 +68,27 @@ void encrypt(struct file_info_st file_info){
             }
             last_block_flag=1;
         }
-        //
         bytes_to_words(file_chunk, file_word, bytes_per_word);
-        //call keygen here
-        //call xtea encryption here
+        //PKCS#7 padding
+
+        //cbc
+        xor_block(file_word,prev_block);
+        
+        //xtea encryption
+        xtea_encrypt(file_word, key);
+        //xtea encryption
+
+        for(int i = 0; i < words_per_chunk;i++){
+            prev_block[i] = file_word[i];
+        }
+        //cbc
+
         words_to_bytes(file_word,file_chunk, bytes_per_word);
+
         bytes_written = file_chunk_write(fpw,CHUNK_SIZE,file_chunk);
+
     }while(bytes_read==CHUNK_SIZE);
+
     //attach Header and Tag
     fclose(fpr);
     fclose(fpw);
@@ -70,9 +99,21 @@ void encrypt(struct file_info_st file_info){
 
 void decrypt(struct file_info_st file_info){
     //packing-unpacking variables
-    size_t bytes_per_word = (WORD_SIZE)/(BITS_PER_BYTE); 
-    uint32_t file_word[(CHUNK_SIZE)/(bytes_per_word)];
+    size_t bytes_per_word = (WORD_SIZE)/(BITS_PER_BYTE);
+    size_t words_per_chunk =(CHUNK_SIZE)/(bytes_per_word);
+    uint32_t file_word[words_per_chunk];
+    //packing-unpacking variables
+
+    //cbc variables
+    uint32_t prev_block[words_per_chunk];//=IV
+    uint32_t prev_block_buffer[words_per_chunk];
+    //cbc variables
+
+    //temp_key
+    uint32_t key[KEY_SIZE/WORD_SIZE];    
     //
+
+    //fileio vars
     uint8_t file_chunk[CHUNK_SIZE];
     size_t bytes_read,bytes_written;
 
@@ -81,17 +122,31 @@ void decrypt(struct file_info_st file_info){
 
     FILE * fpw = file_open_write(file_info.filepath_out);
     if(fpw==NULL){printf("Error finding \"%s\".\n",file_info.filepath_out);fclose(fpr);return;}
-
+    //fileio vars
     printf("\nBoth locations found.\n");
 
     do
     {
         bytes_read = file_chunk_read(fpr,CHUNK_SIZE,file_chunk);
         if(bytes_read==0){break;}
-        bytes_to_words(file_chunk, file_word, bytes_per_word);
-        //call keygen here
-        //call xtea decryption here
+
+        bytes_to_words(file_chunk, file_word, bytes_per_word); 
+        //cbc
+        for(int i = 0; i < words_per_chunk;i++){
+            prev_block_buffer[i]=file_word[i];
+        }
+        //xtea decryption
+        xtea_decrypt(file_word, key);
+        //xtea decryption
+
+        xor_block(file_word,prev_block);
+        for(int i = 0; i < words_per_chunk;i++){
+            prev_block[i]=prev_block_buffer[i];
+        }
+        //cbc
+
         words_to_bytes(file_word,file_chunk, bytes_per_word);
+
         //depad
         bytes_written = file_chunk_write(fpw,bytes_read,file_chunk);
     } while(bytes_read==CHUNK_SIZE);
@@ -105,27 +160,14 @@ void decrypt(struct file_info_st file_info){
 
 void bytes_to_words(uint8_t file_chunk[], uint32_t file_word[], size_t bytes_per_word)
 {
-    /* file_word[] must be zero-initialized before call */
+    for (size_t i = 0; i < (CHUNK_SIZE/bytes_per_word);i++){
+        for(size_t j = 0; j < bytes_per_word; j++){
+            file_word[i] <<= BITS_PER_BYTE;
+            file_word[i]|=(uint32_t)file_chunk[(i * bytes_per_word)+j];
+        }
 
-    for (size_t i = 0; i < CHUNK_SIZE; i++)
-    {
-        /* promote byte to 32-bit before shifting */
-        uint32_t current_word = (uint32_t)file_chunk[i];
-
-        /* big-endian placement:
-           i=0 -> shift 24
-           i=1 -> shift 16
-           i=2 -> shift 8
-           i=3 -> shift 0
-        */
-        current_word <<= (WORD_SIZE -
-                         (BITS_PER_BYTE * (i % bytes_per_word + 1)));
-
-        /* bytes 0..3 -> word[0], bytes 4..7 -> word[1] */
-        file_word[i / bytes_per_word] |= current_word;
     }
 }
-
 
 
 void words_to_bytes(const uint32_t file_word[], uint8_t file_chunk[], size_t bytes_per_word)

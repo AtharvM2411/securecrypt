@@ -1,0 +1,3 @@
+#include <stdint.h>
+#include "config.h"
+void xor_block(uint32_t block_plain[2],const uint32_t block_prev[2]);

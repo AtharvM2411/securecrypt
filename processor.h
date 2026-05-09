@@ -1,6 +1,3 @@
-#define CHUNK_SIZE 8
-#define WORD_SIZE 32
-#define BITS_PER_BYTE 8
 #include <string.h>
 #include"fileio.h"
 struct file_info_st get_file_info();
