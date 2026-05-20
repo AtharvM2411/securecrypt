@@ -3,8 +3,8 @@
 #include "xtea.h"
 #include "cbc.h"
 #include "config.h"
-struct file_info_st get_file_info(){
-    struct file_info_st file_info;
+file_info_st get_file_info(){
+    file_info_st file_info;
 
     printf("Enter the input File Path.\n");
     fgets(file_info.filepath_in,256,stdin);
@@ -21,7 +21,7 @@ struct file_info_st get_file_info(){
     return file_info;
 }
 
-void encrypt(struct file_info_st file_info){
+void encrypt(file_info_st file_info){
     //packing-unpacking variables
     size_t bytes_per_word = (WORD_SIZE)/(BITS_PER_BYTE); 
     size_t words_per_chunk =(CHUNK_SIZE)/(bytes_per_word);
@@ -100,7 +100,7 @@ void encrypt(struct file_info_st file_info){
     return;
 }
 
-void decrypt(struct file_info_st file_info){
+void decrypt(file_info_st file_info){
     //packing-unpacking variables
     size_t bytes_per_word = (WORD_SIZE)/(BITS_PER_BYTE);
     size_t words_per_chunk =(CHUNK_SIZE)/(bytes_per_word);
