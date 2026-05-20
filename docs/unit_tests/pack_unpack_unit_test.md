@@ -1,4 +1,4 @@
-````markdown id="k4l5aa"
+
 # Pack / Unpack Unit Test
 
 ## Purpose
@@ -258,6 +258,3 @@ Without correct serialization logic, block cipher operations would corrupt file 
 # Current Status
 
 Packing and unpacking layer successfully validated and integrated into the project architecture.
-
-```
-```

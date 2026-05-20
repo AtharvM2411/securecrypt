@@ -1,4 +1,3 @@
-````markdown id="n7m4aa"
 # Packing / Unpacking Layer Documentation
 
 ## Purpose
@@ -393,6 +392,3 @@ Cipher Format (32-bit words)
 ```
 
 Without it, XTEA cannot operate directly on file chunks.
-
-```
-```
