@@ -9,7 +9,7 @@ Validate XTEA Encryption and decryption
 #include <string.h>
 #include "../../config.h"
 #include "../crypt_utils/xtea.h"
-void main(){ 
+int main(){ 
     uint32_t block[] = {0x12345678, 0x9ABCDEF0};
     uint32_t bench[] = {0x12345678, 0x9ABCDEF0};
     uint32_t key[] = {
@@ -22,5 +22,8 @@ xtea_encrypt(block,key);
 xtea_decrypt(block,key);
 if (memcmp(block,bench,CHUNK_SIZE)==0){
     puts("\nSTATUS: PASS");
-}else{puts("\nSTATUS: FAIL");}
+    return 0;
+}else{puts("\nSTATUS: FAIL");
+    return 1;
+}
 }

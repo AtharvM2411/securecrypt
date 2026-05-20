@@ -39,9 +39,9 @@ int main()
     );
     if(memcmp(input_chunk,output_chunk,CHUNK_SIZE)==0){
         puts("\nSTATUS: PASS");
+        return 0;
     }else{
         puts("\nSTATUS: FAIL");
+        return 1;
     }
-    
-    return 0;
 }
