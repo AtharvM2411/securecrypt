@@ -6,3 +6,10 @@ tempCodeRunnerfile.*
 tempCoderunnerFile.*
 tempCoderunnerfile.*
 *.exe
+*.png
+*.jpg
+*.jpeg
+*.tiff
+*.mp4
+*_vid.enc
+*_img.enc
