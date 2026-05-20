@@ -25,7 +25,7 @@ int main(){
     printf("\nEnter the Status, 0 for PASS, 1 for FAIL\n");
     scanf("%d",&choice);
     if (choice==0){
-        puts("\nSTATUS: PASS");
-    }else{puts("\nSTATUS: FAIL");}
-    return 0;
+        puts("\nSTATUS: PASS");return 0;
+    }else{puts("\nSTATUS: FAIL");return 1;}
+    
 }
