@@ -13,3 +13,5 @@ tempCoderunnerfile.*
 *.mp4
 *_vid.enc
 *_img.enc
+*.o
+*.d
