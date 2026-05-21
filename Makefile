@@ -6,31 +6,62 @@ CC = gcc
 #Compiler Flags, 
 #-Wpedantic: Enforces strict language standards.
 #-g: Enables source code debugging.
-#-fsanitize=address: Catches runtime memory errors.(ASan)
-#-fsanitize=undefined: Detects undefined code behaviors. (UBSan)
-CFLAGS = -Wall -Wextra -Wpedantic -static-libasan -static-libubsan -O3 -g
-
+#-static-libasan: Catches runtime memory errors.(ASan)
+#-static-libubsan: Detects undefined code behaviors. (UBSan)
+CFLAGS = -Wall -Wextra -Wpedantic -MMD -MP
+SANITIZER_FLAGS = -static-libasan -static-libubsan -fsanitize=address -fsanitize=undefined
+RELEASE_FLAGS = -O3
+DEBUG_FLAGS = -O0 -g
 #Vars
-BUILD = build
-TARGET = $(BUILD)/securecrypt.exe
+BUILD_BIN = build/bin
+BUILD_OBJ = build/obj
+SRC_DIR = src
+TARGET = $(BUILD_BIN)/securecrypt.exe
 INCLUDE = -I./include
 #Source Files
-SRC = $(wildcard src/*.c)	
+SRC = $(wildcard $(SRC_DIR)/*.c)	
+#Obj
+OBJ = $(patsubst $(SRC_DIR)/%.c,$(BUILD_OBJ)/%.o,$(SRC))
 
-.PHONY:	all	clean
+.PHONY:	all	build cleanb cleano clean
 
 #Default Target
 all : $(TARGET)
 
 #Build rule
-$(TARGET) : $(SRC)
-	@if (-not (Test-Path $(BUILD))){New-Item -ItemType directory -Path $(BUILD) | Out-null}
-	@Write-Host "[BUILD] Compiling Source to Target"
-	$(CC) $(CFLAGS) $(INCLUDE) $(SRC) -o $(TARGET)
-	@Write-Host "[SUCCESS] Compilation complete`n[INFO] Executables written at $(TARGET)"
+$(TARGET): $(OBJ)
+	@if (-not (Test-Path $(BUILD_BIN))){New-Item -ItemType directory -Path $(BUILD_BIN) | Out-null}
+	@Write-Host "[LINK] Linking executable..."
+	$(CC) $(CFLAGS) $(INCLUDE) $(OBJ) -o $(TARGET)
+	@Write-Host "[SUCCESS] Linking complete`n[INFO] Executables written at $(TARGET)"
+
+
+$(BUILD_OBJ)/%.o : $(SRC_DIR)/%.c
+	@if (-not (Test-Path $(BUILD_OBJ))){New-Item -ItemType directory -Path $(BUILD_OBJ) | Out-null}
+	@Write-Host "[BUILD] Compiling Source..."
+	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
+	@Write-Host "[SUCCESS] Compilation complete`n[INFO] Object files written at $(BUILD_OBJ)"
+
 run:
-	cd $(BUILD)
+	cd $(BUILD_BIN)
 	./$(TARGET)
-clean : 
-	@Write-Host "[CLEAN] Cleaning build directory"
-	@if (Test-Path $(BUILD)){Remove-Item -Recurse -Force $(BUILD) }
+
+debug : CFLAGS += $(DEBUG_FLAGS)
+debug : all
+
+release : CFLAGS += $(RELEASE_FLAGS) 
+release : all
+
+sanitize : CFLAGS += $(SANITIZER_FLAGS)
+sanitize : all
+
+clean : cleano cleanb
+
+cleanb : 
+	@Write-Host "[CLEAN] Cleaning $(BUILD_BIN) directory"
+	@if (Test-Path $(BUILD_BIN)){Remove-Item -Recurse -Force $(BUILD_BIN) }
+	@Write-Host "[CLEAN] Cleaned $(BUILD_BIN) directory"
+cleano :
+	@Write-Host "[CLEAN] Cleaning $(BUILD_OBJ) directory"
+	@if (Test-Path $(BUILD_OBJ)){Remove-Item -Recurse -Force $(BUILD_OBJ) }
+	@Write-Host "[CLEAN] Cleaned $(BUILD_OBJ) directory"
