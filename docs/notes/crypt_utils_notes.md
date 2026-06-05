@@ -229,7 +229,42 @@ C1 = Encrypt(P1 XOR IV)
 ```text
 Cn = Encrypt(Pn XOR C(n-1))
 ```
+```mermaid
+flowchart LR
 
+IV[IV]
+
+P1[Plaintext Block 1]
+P2[Plaintext Block 2]
+P3[Plaintext Block 3]
+
+X1[XOR]
+X2[XOR]
+X3[XOR]
+
+E1[XTEA Encrypt]
+E2[XTEA Encrypt]
+E3[XTEA Encrypt]
+
+C1[Ciphertext 1]
+C2[Ciphertext 2]
+C3[Ciphertext 3]
+
+IV --> X1
+P1 --> X1
+X1 --> E1
+E1 --> C1
+
+C1 --> X2
+P2 --> X2
+X2 --> E2
+E2 --> C2
+
+C2 --> X3
+P3 --> X3
+X3 --> E3
+E3 --> C3
+```
 ---
 
 # Decryption
