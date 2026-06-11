@@ -1,4 +1,4 @@
-## Understanding of Bug (The Plaintext Repeat Question)
+# memcpy bug -- the plain explanation of question
 
 If you encrypt the exact same 8-byte plaintext block over and over again:
 
@@ -6,7 +6,7 @@ If you encrypt the exact same 8-byte plaintext block over and over again:
 * The last 6 bytes of the encrypted blocks will eventually become identical and repeat. Because memcpy never updates the last 6 bytes of prev_block, those bytes remain static. Once the initial randomness or stack data stabilizes, identical plaintexts will yield identical ciphertext chunks for those final 6 bytes. This leaks structural patterns about your file, completely breaking the core security promise of CBC mode.
 
 ------------------------------
-## Bug Report: Out-of-Bounds/Truncated Element Copy in CBC Chaining Memory Block## Status
+## Bug Report: Out-of-Bounds/Truncated Element Copy in CBC Chaining Memory Block 
 ### Bugfix commit - 3016e745c344ce64b2ff8046136543ab2725c519
 * Severity: High (Security Vulnerability & Technical Debt)
 * Type: Memory Operation Mismatch / Cryptographic Flaw
