@@ -7,15 +7,15 @@ file_info_st get_file_info(){
     file_info_st file_info;
 
     printf("Enter the input File Path.\n");
-    fgets(file_info.filepath_in,256,stdin);
+    fgets(file_info.filepath_in,sizeof(file_info.filepath_in),stdin);
     file_info.filepath_in[strcspn(file_info.filepath_in,"\n")]='\0';
 
     printf("Enter the output File Path.\n");
-    fgets(file_info.filepath_out,256,stdin);
+    fgets(file_info.filepath_out,sizeof(file_info.filepath_out),stdin);
     file_info.filepath_out[strcspn(file_info.filepath_out,"\n")]='\0';
 
     printf("Enter Password.\n");
-    fgets(file_info.password,128,stdin);
+    fgets(file_info.password,sizeof(file_info.password),stdin);
     file_info.password[strcspn(file_info.password,"\n")]='\0';
 
     return file_info;
